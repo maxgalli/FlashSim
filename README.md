@@ -32,3 +32,29 @@ The whole process can be executed by a single call to a Python script,
 which leverages the ROOT C interpreter for running the extraction and
 the uproot package for structuring and saving the data directly in the
 *.root* format, in a corresponding TTree data structure.
+
+# My Instructions
+
+## Muons
+
+To get files:
+```
+/cvmfs/cms.cern.ch/common/dasgoclient -query="file dataset=/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18NanoAODv6-Nano25Oct2019_102X_upgrade2018_realistic_v20_ext2-v1/NANOAODSIM"
+```
+
+Preprocessing:
+```
+root
+root [0] .L preprocessing/muons_extraction.cpp
+root [1] main_function()
+
+python preprocessing/muons_preprocessing.py
+```
+
+Training (watch out the conda environment):
+```
+python trainings/muons_trainings.py
+```
+
+## Jets
+

@@ -16,12 +16,15 @@ import torch.multiprocessing as mp
 from nflows import distributions, flows, transforms, utils
 import nflows.nn.nets as nn_
 import pandas as pd
+import os
 
 # define hyperparams
 lr = 1e-4
-total_epochs = 1000
-batch_size = 2048
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("device: ", device)
+#total_epochs = 1000
+total_epochs = 10
+batch_size = 2048
 
 
 class H5Dataset(Dataset):
@@ -515,23 +518,25 @@ def load_model(model_dir=None, filename=None):
 
 if __name__ == "__main__":
 
+    input_dir = "data/muons"
+    input_files = [os.path.join(input_dir, f) for f in os.listdir(input_dir) if f.endswith(".hdf5")]
+    train_files = input_files[:int(0.8 * len(input_files))]
+    test_files = input_files[int(0.8 * len(input_files)):]
+    print("train files: ", train_files)
+    print("test files: ", test_files)
+
     # define the train and validations datasets
     train_ds = H5Dataset(
-        [
-            "../muonData/amuons1.hdf5",
-            "../muonData/amuons2.hdf5",
-            "../muonData/amuons3.hdf5",
-            "../muonData/amuons4.hdf5",
-            "../muonData/amuons5.hdf5",
-            "../muonData/amuons6.hdf5",
-            "../muonData/amuons8.hdf5",
-            "../muonData/amuons9.hdf5",
-        ]
+        train_files,
+        limit=1000
     )
     train_loader = DataLoader(
         train_ds, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=9
     )
-    test_ds = H5Dataset(["../muonData/amuons7.hdf5"])
+    test_ds = H5Dataset(
+        test_files,
+        limit=1000
+    )
     test_loader = DataLoader(
         test_ds, batch_size=batch_size, shuffle=False, pin_memory=True, num_workers=9
     )

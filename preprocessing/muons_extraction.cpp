@@ -187,7 +187,7 @@ auto charge(ROOT::VecOps::RVec<int> & pdgId) {
 
 
 
-void muons_extraction(){
+void muons_extraction(const char* filename){
 
 	/* The main function. Uses ROOT::RDataFrame to select only muons matching to a Gen-muon, 
 		then extracts all the conditioning variables of the Gen muon and the target variables of the reco muon
@@ -197,8 +197,8 @@ void muons_extraction(){
 	// enable multithreading, open file and init rdataframe
 	// BECAUSE OF MT ORIGINAL ORDERING OF FILE IS NOT PRESERVED
 	ROOT::EnableImplicitMT();
-	TFile *f =TFile::Open("root://cmsxrootd.fnal.gov///store/mc/RunIIAutumn18NanoAODv6/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano25Oct2019_102X_upgrade2018_realistic_v20_ext1-v1/230000/91456D0B-2FDE-2B4F-8C7A-8E60260480CD.root");
-	ROOT::RDataFrame d("Events",f);
+	TFile *f =TFile::Open(filename);
+	ROOT::RDataFrame d("Events", f);
 
 	// create first mask
 	auto d_def = d.Define("MuonMask", "Muon_genPartIdx >=0").Define("MatchedGenMuons", "Muon_genPartIdx[MuonMask]");
@@ -276,7 +276,23 @@ void muons_extraction(){
 		"MMuon_pfRelIso03_all", "MMuon_pfRelIso03_chg", "MMuon_pfRelIso04_all", "MMuon_ptErr",	"MMuon_sip3d", "MMuon_softId", "MMuon_softMva", "MMuon_softMvaId"};
 
 	// finally process columns and save to .root file
-	d_matched.Snapshot("MMuons", "MMuonsA9.root", col_to_save);
-
+	string hash = f->GetUUID().AsString();
+	d_matched.Snapshot("MMuons", "data/muons/" + hash + ".root", col_to_save);
 }
 
+void main_function() {
+	vector<string> files = {
+		"root://xrootd-cms.infn.it///store/mc/RunIIAutumn18NanoAODv6/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano25Oct2019_102X_upgrade2018_realistic_v20_ext2-v1/240000/A491A26D-EAE8-DF41-BD3D-670F26928C26.root",
+		"root://xrootd-cms.infn.it///store/mc/RunIIAutumn18NanoAODv6/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano25Oct2019_102X_upgrade2018_realistic_v20_ext2-v1/240000/5DA45FC5-793A-1D46-8BC8-F48B7165AD3A.root",
+		"root://xrootd-cms.infn.it///store/mc/RunIIAutumn18NanoAODv6/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano25Oct2019_102X_upgrade2018_realistic_v20_ext2-v1/240000/02279C39-9A09-6B4A-84BE-B39F9FCD31AC.root",
+		"root://xrootd-cms.infn.it///store/mc/RunIIAutumn18NanoAODv6/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano25Oct2019_102X_upgrade2018_realistic_v20_ext2-v1/240000/F4B81535-D0A2-4246-9158-2212CA8EC81F.root",
+		"root://xrootd-cms.infn.it///store/mc/RunIIAutumn18NanoAODv6/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano25Oct2019_102X_upgrade2018_realistic_v20_ext2-v1/240000/B659CF6A-CBA6-5241-AD90-A5CE9EA20307.root",
+		"root://xrootd-cms.infn.it///store/mc/RunIIAutumn18NanoAODv6/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano25Oct2019_102X_upgrade2018_realistic_v20_ext2-v1/240000/84D91576-EC88-5E49-8810-857D57743689.root",
+		"root://xrootd-cms.infn.it///store/mc/RunIIAutumn18NanoAODv6/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano25Oct2019_102X_upgrade2018_realistic_v20_ext2-v1/240000/EAA7B28E-4F4B-7540-91A0-4AD7D646A634.root",
+		"root://xrootd-cms.infn.it///store/mc/RunIIAutumn18NanoAODv6/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano25Oct2019_102X_upgrade2018_realistic_v20_ext2-v1/240000/ED184F69-946E-A741-BEEF-53612BEB834B.root"
+	};
+
+	for (auto &&file : files) {
+		muons_extraction(file.c_str());
+	}
+}
